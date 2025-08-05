@@ -2,6 +2,19 @@
 import streamlit as st
 import random
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import platform
+
+# 한글 폰트 설정
+if platform.system() == 'Windows':
+    plt.rc('font', family='Malgun Gothic')  # Windows: 맑은 고딕
+elif platform.system() == 'Darwin':
+    plt.rc('font', family='AppleGothic')    # macOS: 애플고딕
+else:
+    plt.rc('font', family='NanumGothic')    # Linux나 Streamlit Cloud: 나눔고딕
+
+# 마이너스 깨짐 방지
+plt.rcParams['axes.unicode_minus'] = False
 
 def gambling_game(auto_mode=True):
     # 세션 상태 초기화
