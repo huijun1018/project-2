@@ -68,10 +68,10 @@ def gambling_game(auto_mode=True, starting_money=30000):
     st.pyplot(fig1)
 
     # 성공/실패 비율 파이차트
-    st.subheader("🥧 success vs fail percentage")
+    st.subheader("🥧 성공 vs 실패 비율")
     fig2, ax2 = plt.subplots()
     ax2.pie([success_count, fail_count], labels=['success', 'fail'], autopct='%1.1f%%', startangle=90)
-    ax2.set_title("success percentage")
+    ax2.set_title("success vs fail percentage")
     st.pyplot(fig2)
 
 # Streamlit UI
