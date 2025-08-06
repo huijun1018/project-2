@@ -66,9 +66,9 @@ def gambling_game(auto_mode=True):
         # 그래프: 잔액 변화
         fig1, ax1 = plt.subplots()
         ax1.plot(st.session_state.balance_history, marker='o')
-        ax1.set_title('잔액 변화 그래프')
-        ax1.set_xlabel('도박 횟수')
-        ax1.set_ylabel('잔액 (원)')
+        ax1.set_title('Balance Change Graph')
+        ax1.set_xlabel('number of gambling')
+        ax1.set_ylabel('Balance (KRW)')
         ax1.grid(True)
         st.pyplot(fig1)
 
@@ -78,7 +78,7 @@ def gambling_game(auto_mode=True):
                 labels=['성공', '실패'],
                 autopct='%1.1f%%',
                 startangle=90)
-        ax2.set_title('성공 vs 실패 비율')
+        ax2.set_title('success vs fail proportion')
         st.pyplot(fig2)
 
         # 초기화 버튼
@@ -91,5 +91,5 @@ def gambling_game(auto_mode=True):
 # Streamlit 앱 시작점
 st.title("💸 도박 시뮬레이션 게임")
 
-mode = st.radio("모드를 선택하세요", options=["자동 모드", "수동 모드"])
+mode = st.radio("모드를 선택하세요", options=["자동 모드 (3000원 고정 배팅) ", "수동 모드 (배팅금액 직접 입력)"])
 gambling_game(auto_mode=(mode == "자동 모드"))
