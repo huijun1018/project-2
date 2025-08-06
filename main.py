@@ -66,19 +66,19 @@ def gambling_game(auto_mode=True):
         # 그래프: 잔액 변화
         fig1, ax1 = plt.subplots()
         ax1.plot(st.session_state.balance_history, marker='o')
-        ax1.set_title('잔액 변화 그래프')
-        ax1.set_xlabel('도박 횟수')
-        ax1.set_ylabel('잔액 (원)')
+        ax1.set_title('Balance Change Graph')
+        ax1.set_xlabel('number of gambling')
+        ax1.set_ylabel('Balance (KRW)')
         ax1.grid(True)
         st.pyplot(fig1)
 
         # 그래프: 성공/실패 비율
         fig2, ax2 = plt.subplots()
         ax2.pie([st.session_state.success_count, st.session_state.fail_count],
-                labels=['성공', '실패'],
+                labels=['success', 'fail'],
                 autopct='%1.1f%%',
                 startangle=90)
-        ax2.set_title('성공 vs 실패 비율')
+        ax2.set_title('success vs fail proportion')
         st.pyplot(fig2)
 
         # 초기화 버튼
