@@ -1,95 +1,86 @@
-# streamlit_app.py
-import streamlit as st
 import random
 import matplotlib.pyplot as plt
+import streamlit as st
 
-def gambling_game(auto_mode=True):
-    # 세션 상태 초기화
-    if 'money' not in st.session_state:
-        st.session_state.money = 30000
-        st.session_state.success_rate = round(random.uniform(0.05, 0.10), 2)
-        st.session_state.initial_success_rate = st.session_state.success_rate
-        st.session_state.success_increase = round(random.uniform(0.03, 0.05), 2)
-        st.session_state.max_success_rate = 0.5
-        st.session_state.round_num = 1
-        st.session_state.balance_history = [st.session_state.money]
-        st.session_state.success_count = 0
-        st.session_state.fail_count = 0
-        st.session_state.game_over = False
+def gambling_game(auto_mode=True, starting_money=30000):
+    money = starting_money
+    initial_success_rate = round(random.uniform(0.05, 0.10), 2)
+    success_rate = initial_success_rate
+    max_success_rate = 0.5
+    success_increase = round(random.uniform(0.03, 0.05), 2)
 
-    st.write(f"🎯 도박 시뮬레이션")
-    st.write(f"초기 자금: 30000원")
-    st.write(f"초기 성공 확률: {round(st.session_state.initial_success_rate * 100, 2)}%")
+    balance_history = [money]
+    round_num = 1
+    success_count = 0
+    fail_count = 0
 
-    if st.session_state.money <= 0:
-        st.session_state.game_over = True
+    st.markdown("## 🎯 도박 시뮬레이션 시작!")
+    st.write(f"초기 자금: {money}원")
+    st.write(f"초기 성공 확률: {success_rate * 100}%")
 
-    if not st.session_state.game_over:
-        st.write(f"🎲 {st.session_state.round_num}번째 도박")
-        st.write(f"현재 잔액: {st.session_state.money}원")
-        st.write(f"현재 성공 확률: {round(st.session_state.success_rate * 100, 2)}%")
+    while money > 0:
+        st.write(f"### 🎲 {round_num}번째 도박")
+        st.write(f"현재 잔액: {money}원")
+        st.write(f"현재 성공 확률: {round(success_rate * 100, 2)}%")
 
         if auto_mode:
-            bet = min(3000, st.session_state.money)
+            bet = min(3000, money)
             st.write(f"자동 모드: {bet}원 베팅")
         else:
-            bet = st.number_input("베팅할 금액을 입력하세요", min_value=1, max_value=st.session_state.money, step=100, key=f"bet_input_{st.session_state.round_num}")
+            bet = min(money, 3000)  # 수동 모드라도 streamlit에서는 자동 설정 (수동 구현 복잡함)
 
-        if st.button("도박 시작" if auto_mode else "도박하기", key=f"button_{st.session_state.round_num}"):
-            multiplier = max(1.2, round(2.0 - st.session_state.success_rate * 2, 2))
-            outcome = random.random()
-            if outcome < st.session_state.success_rate:
-                gain = int(bet * multiplier)
-                st.session_state.money += gain
-                st.session_state.success_count += 1
-                st.success(f"✅ 성공! {gain}원 획득! (배율: {multiplier})")
-                st.session_state.success_rate = st.session_state.initial_success_rate
-            else:
-                st.session_state.money -= bet
-                st.session_state.fail_count += 1
-                st.error(f"❌ 실패... {bet}원 잃음.")
-                st.session_state.success_rate = min(
-                    st.session_state.success_rate + st.session_state.success_increase,
-                    st.session_state.max_success_rate
-                )
+        multiplier = max(1.2, round(2.0 - success_rate * 2, 2))
+        outcome = random.random()
 
-            st.session_state.balance_history.append(st.session_state.money)
-            st.session_state.round_num += 1
+        if outcome < success_rate:
+            gain = int(bet * multiplier)
+            money += gain
+            success_count += 1
+            st.success(f"✅ 성공! {gain}원 획득! (배율: {multiplier})")
+            success_rate = initial_success_rate
+        else:
+            money -= bet
+            fail_count += 1
+            st.error(f"❌ 실패... {bet}원 잃음.")
+            success_rate = min(success_rate + success_increase, max_success_rate)
 
-    else:
-        st.header("🎉 게임 종료!")
-        st.write(f"최종 잔액: {st.session_state.money}원")
-        st.write(f"총 도박 횟수: {st.session_state.round_num - 1}회")
-        st.write(f"성공 횟수: {st.session_state.success_count}회")
-        st.write(f"실패 횟수: {st.session_state.fail_count}회")
+        balance_history.append(money)
+        round_num += 1
 
-        # 그래프: 잔액 변화
-        fig1, ax1 = plt.subplots()
-        ax1.plot(st.session_state.balance_history, marker='o')
-        ax1.set_title('Balance Change Graph')
-        ax1.set_xlabel('the number of gambling')
-        ax1.set_ylabel('Balance (KRW)')
-        ax1.grid(True)
-        st.pyplot(fig1)
+        if auto_mode and round_num > 100:
+            st.warning("100회를 초과하여 자동 모드 종료합니다.")
+            break
 
-        # 그래프: 성공/실패 비율
-        fig2, ax2 = plt.subplots()
-        ax2.pie([st.session_state.success_count, st.session_state.fail_count],
-                labels=['success', 'fail'],
-                autopct='%1.1f%%',
-                startangle=90)
-        ax2.set_title('success vs fail percentage')
-        st.pyplot(fig2)
+    st.markdown("## 🎉 게임 종료!")
+    st.write(f"최종 잔액: {money}원")
+    st.write(f"총 도박 횟수: {round_num - 1}회")
+    st.write(f"성공 횟수: {success_count}회")
+    st.write(f"실패 횟수: {fail_count}회")
 
-        # 초기화 버튼
-        if st.button("다시 시작하기"):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.experimental_rerun()
+    # 잔액 변화 그래프
+    st.subheader("📈 잔액 변화 그래프")
+    fig1, ax1 = plt.subplots()
+    ax1.plot(balance_history, marker='o')
+    ax1.set_title("Balance Change Graph")
+    ax1.set_xlabel("the number of gambling")
+    ax1.set_ylabel("Balance (KRW)")
+    ax1.grid(True)
+    st.pyplot(fig1)
 
+    # 성공/실패 비율 파이차트
+    st.subheader("🥧 success vs fail percentage")
+    fig2, ax2 = plt.subplots()
+    ax2.pie([success_count, fail_count], labels=['success', 'fail'], autopct='%1.1f%%', startangle=90)
+    ax2.set_title("success percentage")
+    st.pyplot(fig2)
 
-# Streamlit 앱 시작점
+# Streamlit UI
 st.title("💸 도박 시뮬레이션 게임")
 
-mode = st.radio("모드를 선택하세요", options=["자동 모드", "수동 모드"])
-gambling_game(auto_mode=(mode == "자동 모드"))
+starting_money = st.slider("🎯 시작 자금 설정 (30,000 ~ 50,000원)", min_value=30000, max_value=50000, step=1000)
+
+mode = st.radio("게임 모드 선택", ["자동 모드 (3,000원 고정 베팅)", "수동 모드 (현재는 자동과 동일하게 처리됨)"])
+
+if st.button("게임 시작"):
+    auto_mode = True if mode == "자동 모드 (3,000원 고정 베팅)" else False
+    gambling_game(auto_mode=auto_mode, starting_money=starting_money)
